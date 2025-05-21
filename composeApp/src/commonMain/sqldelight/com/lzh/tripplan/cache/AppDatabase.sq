@@ -1,0 +1,97 @@
+CREATE TABLE TRIP (
+    tripId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
+    tripName TEXT
+);
+
+CREATE TABLE DAY_SCHEDULE (
+    scheduleId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    tripId INTEGER,
+    priority INTEGER,
+    dayScheduleName TEXT
+);
+
+CREATE TABLE DAY_EVENT (
+    eventId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    scheduleId INTEGER,
+    priority INTEGER
+);
+
+CREATE TABLE DAY_EVENT_DETAIL (
+    eventDetailId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    eventId INTEGER,
+    priority INTEGER,
+    content TEXT NOT NULL
+);
+
+--选择语句
+selectAllTrip:
+SELECT * FROM TRIP;
+
+selectAllDaySchedule:
+SELECT * FROM DAY_SCHEDULE
+WHERE tripId = :tripId
+ORDER BY priority;
+
+selectAllDayEvent:
+SELECT * FROM DAY_EVENT
+WHERE scheduleId = :scheduleId
+ORDER BY priority;
+
+selectAllEventDetails:
+SELECT * FROM DAY_EVENT_DETAIL
+WHERE eventId = :eventId
+ORDER BY priority;
+
+--插入语句
+insertTrip:
+INSERT INTO TRIP(tripName)
+VALUES (?);
+
+insertDaySchedule:
+INSERT INTO DAY_SCHEDULE(tripId, priority, dayScheduleName)
+VALUES ?;
+
+insertDayEvent:
+INSERT INTO DAY_EVENT(scheduleId, priority)
+VALUES (?, ?);
+
+--事件的插入/更新语句
+upsertEventDetail {
+UPDATE DAY_EVENT_DETAIL
+SET eventId = :eventId,
+    priority = :priority,
+    content = :content
+WHERE eventDetailId = :eventDetailId;
+
+INSERT OR IGNORE INTO DAY_EVENT_DETAIL(eventId, priority, content)
+VALUES (:eventId, :priority, :content);
+}
+
+--更新语句
+updateDayEvent:
+UPDATE DAY_EVENT
+SET priority = :priority
+WHERE eventId =: eventId;
+
+updateDaySchedule:
+UPDATE DAY_SCHEDULE
+SET priority = :priority
+WHERE scheduleId = :scheduleId;
+
+--删除语句
+deleteTrip:
+DELETE FROM TRIP
+WHERE tripId = :tripId;
+
+deleteDaySchedule:
+DELETE FROM DAY_SCHEDULE
+WHERE scheduleId = :scheduleId;
+
+deleteDayEvent:
+DELETE FROM DAY_EVENT
+WHERE eventId = :eventId;
+
+deleteEventDetail:
+DELETE FROM DAY_EVENT_DETAIL
+WHERE eventDetailId = :eventDetailId;
+
