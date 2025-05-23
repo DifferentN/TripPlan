@@ -12,6 +12,6 @@ import com.lzh.tripplan.page.triplistpage.data.triplist.TripListResult
  * @date 2025/3/8
  */
 interface TripDetailResult {
-    class SUCCESS(val trip: Trip?): TripDetailResult
+    class SUCCESS(): TripDetailResult
     class FAIL() : TripDetailResult
 }

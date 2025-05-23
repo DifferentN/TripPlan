@@ -65,9 +65,16 @@ fun MainPage(wholeAppNavigator: Navigator) {
 
         NavHost(mainPageNavigator, initialRoute = TRIP_LIST_PAGE) {
             scene(TRIP_LIST_PAGE) {
-                TripListPage(Modifier, wholeAppNavigator) {
-                    wholeAppNavigator.goBack()
-                }
+                TripListPage(Modifier,
+                    onClickTrip = {tripId ->
+                        mainPageNavigator.navigate("$EXHIBITION_TRIP_PAGE/$tripId",
+                            options = NavOptions(popUpTo = PopUpTo(TRIP_LIST_PAGE, false))
+                        )
+                    },
+                    onBack = {
+                        wholeAppNavigator.goBack()
+                    }
+                )
             }
             scene(CREATE_TRIP_PAGE) {
                 Text("Add Trip")

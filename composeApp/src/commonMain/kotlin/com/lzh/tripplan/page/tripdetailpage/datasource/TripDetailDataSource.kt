@@ -1,6 +1,9 @@
 package com.lzh.tripplan.page.tripdetailpage.datasource
 
 import androidx.compose.runtime.compositionLocalOf
+import com.lzh.tripplan.database.dao.TripPlanDaoManager
+import com.lzh.tripplan.database.entity.DayEvent
+import com.lzh.tripplan.database.entity.DaySchedule
 import com.lzh.tripplan.database.entity.EMPTY_TRIP
 import com.lzh.tripplan.database.entity.Trip
 
@@ -17,7 +20,35 @@ class TripDetailDataSource {
     var tripName: String = ""
         private set
 
-    fun loadTripDetail() {
+    /**
+     * 查找Trip
+     */
+    suspend fun loadTripDetail(tripId: Long): Trip {
+        trip = EMPTY_TRIP
+        val tripList = TripPlanDaoManager.queryAllTripOnlyIdName()
+        if (tripList.isEmpty()) {
+            return EMPTY_TRIP
+        }
+        tripList.forEach {
+            if (it.tripId == tripId) {
+                trip = it
+                return@forEach
+            }
+        }
+        val dayScheduleList = TripPlanDaoManager.queryScheduleIdByTripId(tripId)
+        if (dayScheduleList.isEmpty()) {
+            return EMPTY_TRIP
+        }
+        dayScheduleList.forEach {
+            loadAndFillDaySchedule(it)
+        }
+        trip.daySchedules = dayScheduleList
+        return trip
+    }
+
+    suspend fun loadAndFillDaySchedule(daySchedule: DaySchedule) {
+        val eventList = TripPlanDaoManager.queryEventIdByScheduleId(daySchedule.scheduleId)
+        daySchedule.dayEventList = eventList
     }
 }
 

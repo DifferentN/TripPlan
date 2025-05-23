@@ -165,7 +165,10 @@ fun ColumnScope.TripContentArea(modifier: Modifier,
             val navigator = rememberNavigator("tripDetailPageNavigator")
             LazyRow(Modifier.fillMaxWidth()) {
                 items(tripDetailTabList, key = {it.tabId}) {
-                    Text()
+                    Text(it.tabName,
+                        modifier = Modifier.clickable {
+                            navigator.navigate(it.tabId)
+                        })
                 }
             }
             // 日程内容
@@ -183,130 +186,4 @@ fun ColumnScope.TripContentArea(modifier: Modifier,
         }
 
     }
-}
-
-@Composable
-fun TripDetailDaySchedule(item: DaySchedule?, pageState: TripDetailPageState, pageHandler: IPageHandler) {
-    if (item == null) {
-        Text("Occur Error")
-        return
-    }
-    val eventList = mutableListOf<DayEvent>()
-
-    if (!item.dayEventList.isNullOrEmpty()) {
-        eventList.addAll(item.dayEventList!!)
-    }
-    LazyColumn(Modifier.fillMaxWidth().fillMaxHeight()) {
-        items(eventList, key = {it -> it.hashCode()}) { dayEvent ->
-            TripDayEvent(dayEvent, pageState, pageHandler)
-        }
-        if (pageState == TripDetailPageState.EDIT_STATE) {
-            item {
-                TripDetailAddEvent(pageHandler, item.scheduleId)
-            }
-        }
-    }
-}
-
-@Composable
-fun TripDayEvent(dayEvent: DayEvent, pageState: TripDetailPageState, pageHandler: IPageHandler) {
-    val eventDetailList = mutableListOf<DayEventDetail>()
-    if (!dayEvent.detailList.isNullOrEmpty()) {
-        eventDetailList.addAll(dayEvent.detailList!!)
-    }
-    LazyRow(Modifier.fillMaxWidth().height(60.dp)) {
-        items(eventDetailList, key = { it -> it.hashCode()}) { eventDetail ->
-            var detailContent by remember { mutableStateOf(eventDetail.content) }
-            if (pageState == TripDetailPageState.EDIT_STATE) {
-                TextField(detailContent,
-                    onValueChange = {
-                        detailContent = it
-                        // 保存 Event Detail内容
-                        pageHandler.handlePageEvent<HandlePageEventResult>(AddUpdateEventDetail(eventDetail.eventDetailId,
-                            DEFAULT_DAY_EVENT_DETAIL_ID, detailContent))
-                    },
-                    textStyle = TextStyle(fontSize = 30.sp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
-                    )
-                )
-            } else {
-                Text(eventDetail.content)
-            }
-        }
-        if (pageState == TripDetailPageState.EDIT_STATE) {
-            item {
-                TripDetailAddEventDetail(pageHandler, dayEvent.eventId)
-            }
-        }
-    }
-}
-
-@Composable
-fun BoxScope.TripDetailAddDaySchedule(pageHandler: IPageHandler, isShowCreateDayScheduleTab: MutableState<Boolean>) {
-    if (!isShowCreateDayScheduleTab.value) {
-        return
-    }
-    // 是否展示创建的DaySchedule的动画
-    var isShowCreateDayScheduleLoading by mutableStateOf(false)
-    var dayScheduleName by remember { mutableStateOf("") }
-    Column(Modifier.background(Color.Gray)
-        .wrapContentHeight()
-        .width(240.dp)
-        .align(Alignment.Center)
-    ) {
-        Text("创建新的日程")
-        Spacer(Modifier.height(30.dp))
-        TextField(dayScheduleName,
-            placeholder = { Text("输入旅程名称") },
-            onValueChange = {
-                dayScheduleName = it
-            },
-            textStyle = TextStyle(fontSize = 30.sp),
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
-        )
-
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            Text("confirm",
-                Modifier.clickable {
-                    isShowCreateDayScheduleLoading = true
-                    pageHandler.handlePageEvent(CreateDayScheduleEvent(dayScheduleName)) {result: CreateDayScheduleResult ->
-                        isShowCreateDayScheduleLoading = false
-                        isShowCreateDayScheduleTab.value = false
-                    }
-                },
-                fontSize = 12.sp)
-
-            Text("cancel",
-                Modifier.clickable {
-                    isShowCreateDayScheduleTab.value = false
-                },
-                fontSize = 12.sp)
-        }
-    }
-}
-
-@Composable
-fun TripDetailAddEvent(pageHandler: IPageHandler, dayScheduleId: Long) {
-    Text("Add Event",
-        Modifier.height(60.dp).fillMaxWidth().clickable {
-            pageHandler.handlePageEvent<HandlePageEventResult>(AddScheduleEvent(dayScheduleId))
-        }
-    )
-}
-
-@Composable
-fun TripDetailAddEventDetail(pageHandler: IPageHandler, dayEventId: Long) {
-    Text("Add EventDetail",
-        Modifier.height(60.dp).width(20.dp).clickable {
-            pageHandler.handlePageEvent<HandlePageEventResult>(AddUpdateEventDetail(dayEventId, DEFAULT_DAY_EVENT_DETAIL_ID, ""))
-        })
 }

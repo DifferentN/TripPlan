@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.produceState
@@ -21,12 +22,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.lzh.tripplan.data.TripDigestItem
+import com.lzh.tripplan.database.entity.Trip
+import com.lzh.tripplan.page.EXHIBITION_TRIP_PAGE
+import com.lzh.tripplan.page.TRIP_LIST_PAGE
 import com.lzh.tripplan.page.triplistpage.data.triplist.TripListResult
 import com.lzh.tripplan.page.triplistpage.data.triplist.TripListUiState
 import com.lzh.tripplan.page.triplistpage.transform.transformToTripDigestItem
 import com.lzh.tripplan.view.LoadingView
 import com.lzh.tripplan.viewmodel.triplist.TripListViewModel
+import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
+import moe.tlaster.precompose.navigation.PopUpTo
 
 /**
  * Copyright (c) 2020 Tencent. All rights reserved.
@@ -36,20 +42,13 @@ import moe.tlaster.precompose.navigation.Navigator
  * @date 2025/2/8
  */
 @Composable
-fun TripListPage(modifier: Modifier, wholeAppNavigator: Navigator, onBack: () -> Unit) {
+fun TripListPage(modifier: Modifier, onClickTrip: (tripId: Long) -> Unit, onBack: () -> Unit) {
     val viewModel = remember { TripListViewModel() }
-    val tripList = remember {
-        mutableStateListOf<TripDigestItem>()
-    }
     Column(modifier = modifier) {
         Text("Have a nice trip")
         val state by produceState(TripListUiState(isLoading = true)) {
             val result = viewModel.loadTripList()
             if (result is TripListResult.SUCCESS) {
-                tripList.clear()
-                result.tripList?.tripList?.forEach {
-                    tripList.add(it.transformToTripDigestItem())
-                }
                 value = TripListUiState(isLoading = false, isSuccess = true)
             } else {
                 value = TripListUiState(isLoading = false, isSuccess = false)
@@ -63,11 +62,12 @@ fun TripListPage(modifier: Modifier, wholeAppNavigator: Navigator, onBack: () ->
                 }
             }
             state.isSuccess -> {
+                val tripList = viewModel.tripList.collectAsState().value
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(tripList,
                         key = {it -> it.tripId}
                     ) {
-                        tripAbstractItem(it, wholeAppNavigator)
+                        tripAbstractItem(it, onClickTrip)
                     }
                 }
             }
@@ -81,23 +81,14 @@ fun TripListPage(modifier: Modifier, wholeAppNavigator: Navigator, onBack: () ->
 }
 
 @Composable
-fun tripAbstractItem(item: TripDigestItem, navigator: Navigator) {
+fun tripAbstractItem(item: Trip, onClickTrip: (tripId: Long) -> Unit) {
     Column(modifier = Modifier
         .fillMaxWidth()
         .wrapContentHeight()
         .clickable {
-
+            onClickTrip(item.tripId)
         }
     ) {
-        Text(item.title)
-        Row {
-            Text("启程时间：")
-            Text("${item.launchTime}")
-        }
-        Row {
-            Text("结束时间")
-            Text("${item.endTime}")
-        }
-
+        Text(item.tripName.toString())
     }
 }
