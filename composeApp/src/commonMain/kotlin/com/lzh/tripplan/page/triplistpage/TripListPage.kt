@@ -42,7 +42,7 @@ import moe.tlaster.precompose.navigation.PopUpTo
  * @date 2025/2/8
  */
 @Composable
-fun TripListPage(modifier: Modifier, onClickTrip: (tripId: Long) -> Unit, onBack: () -> Unit) {
+fun TripListPage(modifier: Modifier, onClickTrip: (tripId: Long) -> Unit) {
     val viewModel = remember { TripListViewModel() }
     Column(modifier = modifier) {
         Text("Have a nice trip")

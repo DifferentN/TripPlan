@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -134,7 +135,7 @@ fun TripDetailPage(tripId: Long, onBack: () -> Unit) {
 
 @Composable
 fun TripTitleArea(modifier: Modifier, titleInfo: TripDetailTitleInfo, onBack: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(60.dp)) {
+    Box(modifier) {
 
         Image(modifier = Modifier
             .width(20.dp)
@@ -165,10 +166,9 @@ fun ColumnScope.TripContentArea(modifier: Modifier,
             val navigator = rememberNavigator("tripDetailPageNavigator")
             LazyRow(Modifier.fillMaxWidth()) {
                 items(tripDetailTabList, key = {it.tabId}) {
-                    Text(it.tabName,
-                        modifier = Modifier.clickable {
-                            navigator.navigate(it.tabId)
-                        })
+                    TripDetailTab(tab = it,
+                        onClick = { navigator.navigate(it.tabId)}
+                    )
                 }
             }
             // 日程内容
@@ -184,6 +184,18 @@ fun ColumnScope.TripContentArea(modifier: Modifier,
                 }
             }
         }
+    }
+}
 
+@Composable
+fun TripDetailTab(tab: TripDetailTab, onClick: () -> Unit) {
+    Box(modifier = Modifier
+        .padding(4.dp)
+        .border(2.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
+        .background(color = Color.White, shape = RoundedCornerShape(10.dp))
+        .clickable { onClick() }
+        .padding(4.dp, 2.dp)
+    ) {
+        Text(tab.tabName, modifier = Modifier.align(Alignment.Center))
     }
 }

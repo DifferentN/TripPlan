@@ -67,12 +67,9 @@ fun MainPage(wholeAppNavigator: Navigator) {
             scene(TRIP_LIST_PAGE) {
                 TripListPage(Modifier,
                     onClickTrip = {tripId ->
-                        mainPageNavigator.navigate("$EXHIBITION_TRIP_PAGE/$tripId",
+                        wholeAppNavigator.navigate("$EXHIBITION_TRIP_PAGE/$tripId",
                             options = NavOptions(popUpTo = PopUpTo(TRIP_LIST_PAGE, false))
                         )
-                    },
-                    onBack = {
-                        wholeAppNavigator.goBack()
                     }
                 )
             }
@@ -90,12 +87,6 @@ fun MainPage(wholeAppNavigator: Navigator) {
             }
             scene(MINE_PAGE) {
                 Text("Mine Page")
-            }
-            scene("$EXHIBITION_TRIP_PAGE/{id}") {backStackEntry ->
-                val id: Long = backStackEntry.path<Long>("id") ?: -1
-                TripDetailPage(id.toLong()) {
-                    wholeAppNavigator.goBack()
-                }
             }
         }
     }

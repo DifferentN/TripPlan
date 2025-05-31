@@ -29,15 +29,16 @@ class TripDetailDataSource {
         if (tripList.isEmpty()) {
             return EMPTY_TRIP
         }
-        tripList.forEach {
-            if (it.tripId == tripId) {
-                trip = it
-                return@forEach
+        for (tripItem in tripList) {
+            if (tripItem.tripId == tripId) {
+                trip = tripItem
+                break
             }
         }
+
         val dayScheduleList = TripPlanDaoManager.queryScheduleIdByTripId(tripId)
         if (dayScheduleList.isEmpty()) {
-            return EMPTY_TRIP
+            return trip
         }
         dayScheduleList.forEach {
             loadAndFillDaySchedule(it)
@@ -49,6 +50,14 @@ class TripDetailDataSource {
     suspend fun loadAndFillDaySchedule(daySchedule: DaySchedule) {
         val eventList = TripPlanDaoManager.queryEventIdByScheduleId(daySchedule.scheduleId)
         daySchedule.dayEventList = eventList
+        daySchedule.dayEventList?.forEach {
+            loadAndFillDayEvent(it)
+        }
+    }
+
+    suspend fun loadAndFillDayEvent(dayEvent: DayEvent) {
+        val detailList = TripPlanDaoManager.queryEventDetailByEventId(dayEvent.eventId)
+        dayEvent.detailList = detailList
     }
 }
 
