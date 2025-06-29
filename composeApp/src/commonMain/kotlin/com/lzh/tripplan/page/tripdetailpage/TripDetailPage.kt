@@ -28,6 +28,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +66,8 @@ import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTab
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTabType
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTitleInfo
 import com.lzh.tripplan.page.tripdetailpage.datasource.LocalTripDetailDataSources
+import com.lzh.tripplan.page.tripdetailpage.datasource.LocalTripDetailViewModelStore
+import com.lzh.tripplan.page.tripdetailpage.datasource.TRIP_DETAIL_VIEW_MODEL_STORE
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
 import com.lzh.tripplan.page.tripdetailpage.event.AddUpdateEventDetail
 import com.lzh.tripplan.page.tripdetailpage.event.AddScheduleEvent
@@ -109,7 +113,9 @@ fun TripDetailPage(tripId: Long, onBack: () -> Unit) {
                 }
             }
             tripState.isSuccess -> {
-                CompositionLocalProvider(LocalTripDetailDataSources provides viewModel.dataSource) {
+                CompositionLocalProvider(LocalTripDetailDataSources provides viewModel.dataSource,
+                    LocalTripDetailViewModelStore provides TRIP_DETAIL_VIEW_MODEL_STORE)
+                {
                     TripTitleArea(Modifier
                         .height(60.dp)
                         .fillMaxWidth(),
@@ -159,6 +165,13 @@ fun TripTitleArea(modifier: Modifier, titleInfo: TripDetailTitleInfo, onBack: ()
 fun ColumnScope.TripContentArea(modifier: Modifier,
     tripDetailTabList: List<TripDetailTab>
 ) {
+    // 当trip detail 页面销毁时，清除viewModelStore
+    val viewModelStore = rememberUpdatedState(LocalTripDetailViewModelStore.current)
+    DisposableEffect(true) {
+        onDispose {
+            viewModelStore.value.clear()
+        }
+    }
     Box(modifier.border(BorderStroke(2.dp, Color.Gray),
         shape = RoundedCornerShape(6.dp, 6.dp, 0.dp, 0.dp))
     ) {
@@ -177,7 +190,7 @@ fun ColumnScope.TripContentArea(modifier: Modifier,
                     scene(tripDetailTabList[index].tabId){
                         when(tripDetailTabList[index].tabType) {
                             TripDetailTabType.SUMMARY -> TripDetailSummaryPage(Modifier)
-                            TripDetailTabType.DAY_TAB -> Text("日程")
+                            TripDetailTabType.DAY_TAB -> TripDaySchedulePage(tripDetailTabList[index].dayId)
                             else -> Text("添加")
                         }
                     }

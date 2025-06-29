@@ -1,11 +1,14 @@
 package com.lzh.tripplan.page.tripdetailpage.datasource
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.lifecycle.ViewModelStore
 import com.lzh.tripplan.database.dao.TripPlanDaoManager
 import com.lzh.tripplan.database.entity.DayEvent
 import com.lzh.tripplan.database.entity.DaySchedule
 import com.lzh.tripplan.database.entity.EMPTY_TRIP
 import com.lzh.tripplan.database.entity.Trip
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Copyright (c) 2020 Tencent. All rights reserved.
@@ -20,6 +23,8 @@ class TripDetailDataSource {
     var tripName: String = ""
         private set
 
+    private val LOCK = Mutex()
+    private val observerSet = mutableSetOf<TripDetailDataObserver>()
     /**
      * 查找Trip
      */
@@ -59,7 +64,32 @@ class TripDetailDataSource {
         val detailList = TripPlanDaoManager.queryEventDetailByEventId(dayEvent.eventId)
         dayEvent.detailList = detailList
     }
+
+    suspend fun subscribe(observer: TripDetailDataObserver) {
+        LOCK.withLock {
+            observerSet.add(observer)
+        }
+    }
+
+    suspend fun unsubscribe(observer: TripDetailDataObserver) {
+        LOCK.withLock {
+            observerSet.remove(observer)
+        }
+    }
+
+    fun obtainDaySchedule(dayId: Long): DaySchedule? {
+        val daySchedule: DaySchedule? = trip.daySchedules?.filter { it.scheduleId == dayId }?.getOrNull(0)
+        return daySchedule
+    }
+
+    fun notifyTripDataChanged() {
+        observerSet.forEach {
+            it.onTripDetailDataChanged()
+        }
+    }
 }
 
 val EMPTY_TRIP_DETAIL_DATA_SOURCE = TripDetailDataSource()
 val LocalTripDetailDataSources = compositionLocalOf { EMPTY_TRIP_DETAIL_DATA_SOURCE }
+val TRIP_DETAIL_VIEW_MODEL_STORE = ViewModelStore()
+val LocalTripDetailViewModelStore = compositionLocalOf { TRIP_DETAIL_VIEW_MODEL_STORE }

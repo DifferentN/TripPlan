@@ -1,8 +1,10 @@
 package com.lzh.tripplan.viewmodel.tripdetail
 
 import androidx.lifecycle.viewModelScope
+import com.lzh.tripplan.database.entity.DayEvent
+import com.lzh.tripplan.database.entity.DaySchedule
 import com.lzh.tripplan.event.PageEvent
-import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.DayScheduleSummaryData
+import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.DayEventExhibitionData
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataObserver
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
 import com.lzh.tripplan.viewmodel.BaseViewModel
@@ -18,16 +20,28 @@ import kotlinx.coroutines.launch
  * 类功能描述:
  *
  * @author zhenghaoli
- * @date 2025/5/14
+ * @date 2025/6/25
  */
-class TripDetailSummaryViewModel(val dataSource: TripDetailDataSource): BaseViewModel(), TripDetailDataObserver {
-    private val _dayScheduleSummaryList = MutableStateFlow<List<DayScheduleSummaryData>>(mutableListOf())
-    val dayScheduleSummaryList = _dayScheduleSummaryList.asStateFlow()
+class TripDayScheduleViewModel(val dataSource: TripDetailDataSource, val dayId: Long): BaseViewModel(), TripDetailDataObserver  {
+    private val _dayEventList = MutableStateFlow<List<DayEventExhibitionData>>(mutableListOf())
+    val dayEventList = _dayEventList.asStateFlow()
+    private var daySchedule: DaySchedule? = null
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            dataSource.subscribe(this@TripDetailSummaryViewModel)
+            dataSource.subscribe(this@TripDayScheduleViewModel)
         }
+        daySchedule = dataSource.obtainDaySchedule(dayId)
+        val eventListOnOneDay = daySchedule?.dayEventList?.map { it
+            val eventId = it.eventId
+            val title = "${it.eventId}"
+            var comment = StringBuilder()
+            it.detailList?.forEach { detail ->
+                comment.append(detail.content)
+            }
+            DayEventExhibitionData(eventId, title, comment.toString())
+        } ?: mutableListOf()
+        _dayEventList.value = eventListOnOneDay
     }
 
     override fun <T : HandlePageEventResult> handlePageEvent(
@@ -42,13 +56,13 @@ class TripDetailSummaryViewModel(val dataSource: TripDetailDataSource): BaseView
     }
 
     override fun onTripDetailDataChanged() {
-
     }
 
     override fun onCleared() {
         super.onCleared()
+
         viewModelScope.launch(Dispatchers.IO) {
-            dataSource.unsubscribe(this@TripDetailSummaryViewModel)
+            dataSource.unsubscribe(this@TripDayScheduleViewModel)
         }
     }
 }
