@@ -10,4 +10,5 @@ import androidx.lifecycle.ViewModel
  * @date 2025/3/10
  */
 abstract class BaseViewModel: ViewModel(), IPageHandler {
+    override var nextHandler: IPageHandler? = null
 }

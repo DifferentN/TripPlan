@@ -15,8 +15,15 @@ const val TRIP_LIST_PAGE = "/tripListPage"
 const val MINE_PAGE = "/minePage"
 const val EXHIBITION_TRIP_PAGE = "/exhibitionTripPage"
 
+
 /**
  * app内的路由
  */
 const val MAIN_PAGE = "/mainPage"
 const val CREATE_TRIP_PAGE = "/createTripPage"
+
+/**
+ * trip详情页路由
+ */
+const val TRIP_DETAIL_PAGE_ENTRANCE = "/entranceTripDetailPage"
+const val CREATE_DAY_EVENT_PAGE = "/createDayEventPage"

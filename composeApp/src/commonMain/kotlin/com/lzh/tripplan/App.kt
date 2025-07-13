@@ -8,6 +8,7 @@ import com.lzh.tripplan.page.EXHIBITION_TRIP_PAGE
 import com.lzh.tripplan.page.MAIN_PAGE
 import com.lzh.tripplan.page.MainPage
 import com.lzh.tripplan.page.tripdetailpage.TripDetailPage
+import com.lzh.tripplan.viewmodel.AppViewModel
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.path
@@ -20,6 +21,7 @@ fun App() {
     // 初始化数据库
     DatabaseManager.initDatabaseManager()
 
+    val appViewModel = remember { AppViewModel() }
     PreComposeApp {
         MaterialTheme {
             val wholeAppNavHostController = rememberNavigator("APP_Navigator")
@@ -32,7 +34,7 @@ fun App() {
 
                 scene("$EXHIBITION_TRIP_PAGE/{id}") {backStackEntry ->
                     val id: Long = backStackEntry.path<Long>("id") ?: -1
-                    TripDetailPage(id.toLong()) {
+                    TripDetailPage(id.toLong(), appViewModel) {
                         wholeAppNavHostController.goBack()
                     }
                 }

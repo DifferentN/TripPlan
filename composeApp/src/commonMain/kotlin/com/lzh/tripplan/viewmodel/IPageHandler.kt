@@ -12,6 +12,7 @@ import com.lzh.tripplan.event.PageEventHandleResponse
  * @date 2025/3/10
  */
 interface IPageHandler {
+    var nextHandler: IPageHandler?
     // 可以异步处理，处理结果通过回调返回
     fun <T: HandlePageEventResult> handlePageEvent(pageEvent: PageEvent, callback: ((T) -> Unit)? = null)
 

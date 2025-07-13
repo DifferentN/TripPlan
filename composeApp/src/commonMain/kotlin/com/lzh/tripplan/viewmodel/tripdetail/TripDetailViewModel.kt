@@ -2,6 +2,7 @@ package com.lzh.tripplan.viewmodel.tripdetail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.node.WeakReference
 import androidx.lifecycle.viewModelScope
 import com.lzh.tripplan.cache.DAY_SCHEDULE
 import com.lzh.tripplan.database.entity.Trip
@@ -18,10 +19,14 @@ import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TRIP_DETAIL_SUMMARY_
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTab
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTabType
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
+import com.lzh.tripplan.page.tripdetailpage.event.CreateDayEventEvent
 import com.lzh.tripplan.page.tripdetailpage.event.CreateDayScheduleEvent
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
+import com.lzh.tripplan.viewmodel.IPageHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import moe.tlaster.precompose.navigation.Navigator
 
 /**
  * Copyright (c) 2020 Tencent. All rights reserved.
@@ -42,8 +47,16 @@ class TripDetailViewModel: BaseViewModel() {
 
     val dataSource = TripDetailDataSource()
 
-    override fun <T : HandlePageEventResult> handlePageEvent(pageEvent: PageEvent, callback: ((T) -> Unit)?) {
+    private var navigator: Navigator? = null
 
+    override fun <T : HandlePageEventResult> handlePageEvent(pageEvent: PageEvent, callback: ((T) -> Unit)?) {
+        when {
+            pageEvent is CreateDayEventEvent -> {
+                jumpToCreateDayEventPage(pageEvent)
+            }
+            else -> {
+            }
+        }
     }
 
     override suspend fun <T : HandlePageEventResult> syncHandlePageEvent(pageEvent: PageEvent): T? {
@@ -66,12 +79,39 @@ class TripDetailViewModel: BaseViewModel() {
         val tabList = mutableListOf<TripDetailTab>()
         tabList.add(TripDetailTab(TRIP_DETAIL_SUMMARY_TAB, TripDetailTabType.SUMMARY, "概览", -1))
         trip.daySchedules?.forEach {
-            tabList.add(TripDetailTab("${TRIP_DETAIL_PREFIX}_${it.scheduleId}", TripDetailTabType.DAY_TAB, "概览", it.scheduleId))
+            tabList.add(TripDetailTab("${TRIP_DETAIL_PREFIX}_${it.scheduleId}", TripDetailTabType.DAY_TAB, it.scheduleName, it.scheduleId))
         }
         tabList.add(TripDetailTab(TRIP_DETAIL_ADD_TAB, TripDetailTabType.ADD_TAB, "添加", -1))
         _tripDetailTabList.value = tabList
 
         return TripDetailResult.SUCCESS()
+    }
+
+    /**
+     * 创建一个新的daySchedule
+     */
+    fun createNewDaySchedule() {
+        viewModelScope.launch {
+            val tripId = _trip.value.tripId
+            if (tripId == EMPTY_TRIP_ID) {
+                return@launch
+            }
+            dataSource.createNewDaySchedule()
+            // 重新加载 trip
+            loadTrip(tripId)
+        }
+    }
+
+    fun updatePageHandler(pageHandler: IPageHandler?) {
+        nextHandler = pageHandler
+    }
+
+    fun updateNavigator(navigator: Navigator) {
+        this.navigator = navigator
+    }
+
+    private fun jumpToCreateDayEventPage(event: CreateDayEventEvent) {
+        navigator?.navigate("${event.pageId}/${event.tripId}/${event.dayScheduleId}")
     }
 
     private fun <T: HandlePageEventResult> createDaySchedule(event: CreateDayScheduleEvent, callback: ((T) -> Unit)?) {

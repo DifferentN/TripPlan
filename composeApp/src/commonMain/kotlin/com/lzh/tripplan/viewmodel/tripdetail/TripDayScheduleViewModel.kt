@@ -1,7 +1,6 @@
 package com.lzh.tripplan.viewmodel.tripdetail
 
 import androidx.lifecycle.viewModelScope
-import com.lzh.tripplan.database.entity.DayEvent
 import com.lzh.tripplan.database.entity.DaySchedule
 import com.lzh.tripplan.event.PageEvent
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.DayEventExhibitionData
@@ -9,6 +8,7 @@ import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataObserver
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
 import com.lzh.tripplan.viewmodel.BaseViewModel
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
+import com.lzh.tripplan.viewmodel.IPageHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,5 +64,9 @@ class TripDayScheduleViewModel(val dataSource: TripDetailDataSource, val dayId: 
         viewModelScope.launch(Dispatchers.IO) {
             dataSource.unsubscribe(this@TripDayScheduleViewModel)
         }
+    }
+
+    fun updatePageHandler(pageHandler: IPageHandler?) {
+        nextHandler = pageHandler
     }
 }
