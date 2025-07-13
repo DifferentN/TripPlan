@@ -80,7 +80,7 @@ fun TripDaySchedulePage(dayId: Long, parentPageHandler: IPageHandler?) {
                 AddDayEvent(Modifier.fillMaxWidth(),
                     onClickAddDayEvent = {
                         parentPageHandler?.handlePageEvent(
-                            CreateDayEventEvent(CREATE_DAY_EVENT_PAGE, dataSource.value.trip.tripId, dayId)
+                            CreateDayEventEvent(CREATE_DAY_EVENT_PAGE, dayId, -1)
                         ) { result: HandlePageEventResult ->
                             // no nothing
                         }

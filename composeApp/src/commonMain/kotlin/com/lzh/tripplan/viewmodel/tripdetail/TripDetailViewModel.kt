@@ -111,7 +111,7 @@ class TripDetailViewModel: BaseViewModel() {
     }
 
     private fun jumpToCreateDayEventPage(event: CreateDayEventEvent) {
-        navigator?.navigate("${event.pageId}/${event.tripId}/${event.dayScheduleId}")
+        navigator?.navigate("${event.pageId}/${event.dayScheduleId}/${event.dayEventId}")
     }
 
     private fun <T: HandlePageEventResult> createDaySchedule(event: CreateDayScheduleEvent, callback: ((T) -> Unit)?) {

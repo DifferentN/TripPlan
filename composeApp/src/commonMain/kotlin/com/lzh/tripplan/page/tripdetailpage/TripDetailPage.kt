@@ -81,18 +81,22 @@ fun TripDetailPage(tripId: Long, parentPageHandler: IPageHandler, onBack: () -> 
             }
 
             tripState.isSuccess -> {
-                val detailPageController = rememberNavigator("TripDetailPage")
-                viewModel.updateNavigator(detailPageController)
-                NavHost(detailPageController, initialRoute = TRIP_DETAIL_PAGE_ENTRANCE) {
-                    scene(TRIP_DETAIL_PAGE_ENTRANCE) {
-                        TripDetailExhibitionScene(viewModel, onBack)
-                    }
+                CompositionLocalProvider(LocalTripDetailDataSources provides viewModel.dataSource,
+                    LocalTripDetailViewModelStore provides TRIP_DETAIL_VIEW_MODEL_STORE)
+                {
+                    val detailPageController = rememberNavigator("TripDetailPage")
+                    viewModel.updateNavigator(detailPageController)
+                    NavHost(detailPageController, initialRoute = TRIP_DETAIL_PAGE_ENTRANCE) {
+                        scene(TRIP_DETAIL_PAGE_ENTRANCE) {
+                            TripDetailExhibitionScene(viewModel, onBack)
+                        }
 
-                    scene("$CREATE_DAY_EVENT_PAGE/{dayScheduleId}/{dayEventId}") { backStackEntry ->
-                        val dayScheduleId: Long = backStackEntry.path<Long>("dayScheduleId") ?: -1
-                        val dayEventId: Long = backStackEntry.path<Long>("dayEventId") ?: -1
-                        TripDayEventPage(dayScheduleId, dayEventId, viewModel) {
-                            detailPageController.goBack()
+                        scene("$CREATE_DAY_EVENT_PAGE/{dayScheduleId}/{dayEventId}") { backStackEntry ->
+                            val dayScheduleId: Long = backStackEntry.path<Long>("dayScheduleId") ?: -1
+                            val dayEventId: Long = backStackEntry.path<Long>("dayEventId") ?: -1
+                            TripDayEventPage(dayScheduleId, dayEventId, viewModel) {
+                                detailPageController.goBack()
+                            }
                         }
                     }
                 }
@@ -108,26 +112,22 @@ fun TripDetailPage(tripId: Long, parentPageHandler: IPageHandler, onBack: () -> 
 
 @Composable
 fun ColumnScope.TripDetailExhibitionScene(viewModel: TripDetailViewModel, onBack: () -> Unit) {
-    CompositionLocalProvider(LocalTripDetailDataSources provides viewModel.dataSource,
-        LocalTripDetailViewModelStore provides TRIP_DETAIL_VIEW_MODEL_STORE)
-    {
-        Box(Modifier.fillMaxSize()) {
-            Column {
-                TripTitleArea(Modifier
-                    .height(60.dp)
-                    .fillMaxWidth(),
-                    TripDetailTitleInfo(viewModel.tripName.collectAsState().value),
-                    onBack
-                )
+    Box(Modifier.fillMaxSize()) {
+        Column {
+            TripTitleArea(Modifier
+                .height(60.dp)
+                .fillMaxWidth(),
+                TripDetailTitleInfo(viewModel.tripName.collectAsState().value),
+                onBack
+            )
 
-                TripContentArea(Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
-                    viewModel.tripDetailTabList.collectAsState().value,
-                    viewModel,
-                    createNewDaySchedule = { viewModel.createNewDaySchedule() }
-                )
-            }
+            TripContentArea(Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(),
+                viewModel.tripDetailTabList.collectAsState().value,
+                viewModel,
+                createNewDaySchedule = { viewModel.createNewDaySchedule() }
+            )
         }
     }
 }
