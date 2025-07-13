@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -110,20 +111,24 @@ fun ColumnScope.TripDetailExhibitionScene(viewModel: TripDetailViewModel, onBack
     CompositionLocalProvider(LocalTripDetailDataSources provides viewModel.dataSource,
         LocalTripDetailViewModelStore provides TRIP_DETAIL_VIEW_MODEL_STORE)
     {
-        TripTitleArea(Modifier
-            .height(60.dp)
-            .fillMaxWidth(),
-            TripDetailTitleInfo(viewModel.tripName.collectAsState().value),
-            onBack
-        )
+        Box(Modifier.fillMaxSize()) {
+            Column {
+                TripTitleArea(Modifier
+                    .height(60.dp)
+                    .fillMaxWidth(),
+                    TripDetailTitleInfo(viewModel.tripName.collectAsState().value),
+                    onBack
+                )
 
-        TripContentArea(Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(),
-            viewModel.tripDetailTabList.collectAsState().value,
-            viewModel,
-            createNewDaySchedule = { viewModel.createNewDaySchedule() }
-        )
+                TripContentArea(Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
+                    viewModel.tripDetailTabList.collectAsState().value,
+                    viewModel,
+                    createNewDaySchedule = { viewModel.createNewDaySchedule() }
+                )
+            }
+        }
     }
 }
 
