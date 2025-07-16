@@ -55,17 +55,9 @@ insertDayEvent:
 INSERT INTO DAY_EVENT(scheduleId, priority)
 VALUES (?, ?);
 
---事件的插入/更新语句
-upsertEventDetail {
-UPDATE DAY_EVENT_DETAIL
-SET eventId = :eventId,
-    priority = :priority,
-    content = :content
-WHERE eventDetailId = :eventDetailId;
-
+insertEventDetail:
 INSERT OR IGNORE INTO DAY_EVENT_DETAIL(eventId, priority, content)
 VALUES (:eventId, :priority, :content);
-}
 
 --更新语句
 updateDayEvent:
@@ -77,6 +69,13 @@ updateDaySchedule:
 UPDATE DAY_SCHEDULE
 SET priority = :priority
 WHERE scheduleId = :scheduleId;
+
+updateEventDetail:
+UPDATE DAY_EVENT_DETAIL
+SET eventId = :eventId,
+    priority = :priority,
+    content = :content
+WHERE eventDetailId = :eventDetailId;
 
 --删除语句
 deleteTrip:

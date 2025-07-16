@@ -2,14 +2,10 @@ package com.lzh.tripplan.viewmodel.tripdetail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.node.WeakReference
 import androidx.lifecycle.viewModelScope
-import com.lzh.tripplan.cache.DAY_SCHEDULE
 import com.lzh.tripplan.database.entity.Trip
 import com.lzh.tripplan.data.EMPTY_TRIP_ID
-import com.lzh.tripplan.database.dao.TripPlanDaoManager
 import com.lzh.tripplan.database.entity.EMPTY_TRIP
-import com.lzh.tripplan.page.tripdetailpage.TripDetailPageState
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailResult
 import com.lzh.tripplan.viewmodel.BaseViewModel
 import com.lzh.tripplan.event.PageEvent
@@ -19,7 +15,7 @@ import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TRIP_DETAIL_SUMMARY_
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTab
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.TripDetailTabType
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
-import com.lzh.tripplan.page.tripdetailpage.event.CreateDayEventEvent
+import com.lzh.tripplan.page.tripdetailpage.event.CreateModifyDayEventEvent
 import com.lzh.tripplan.page.tripdetailpage.event.CreateDayScheduleEvent
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
 import com.lzh.tripplan.viewmodel.IPageHandler
@@ -51,7 +47,7 @@ class TripDetailViewModel: BaseViewModel() {
 
     override fun <T : HandlePageEventResult> handlePageEvent(pageEvent: PageEvent, callback: ((T) -> Unit)?) {
         when {
-            pageEvent is CreateDayEventEvent -> {
+            pageEvent is CreateModifyDayEventEvent -> {
                 jumpToCreateDayEventPage(pageEvent)
             }
             else -> {
@@ -110,7 +106,7 @@ class TripDetailViewModel: BaseViewModel() {
         this.navigator = navigator
     }
 
-    private fun jumpToCreateDayEventPage(event: CreateDayEventEvent) {
+    private fun jumpToCreateDayEventPage(event: CreateModifyDayEventEvent) {
         navigator?.navigate("${event.pageId}/${event.dayScheduleId}/${event.dayEventId}")
     }
 

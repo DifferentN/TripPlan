@@ -1,11 +1,13 @@
 package com.lzh.tripplan.viewmodel.tripdetail
 
 import androidx.lifecycle.viewModelScope
+import com.lzh.tripplan.database.entity.DayEvent
 import com.lzh.tripplan.database.entity.DaySchedule
 import com.lzh.tripplan.event.PageEvent
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.DayEventExhibitionData
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataObserver
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
+import com.lzh.tripplan.utils.EventDetailUtils
 import com.lzh.tripplan.viewmodel.BaseViewModel
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
 import com.lzh.tripplan.viewmodel.IPageHandler
@@ -33,13 +35,7 @@ class TripDayScheduleViewModel(val dataSource: TripDetailDataSource, val dayId: 
         }
         daySchedule = dataSource.obtainDaySchedule(dayId)
         val eventListOnOneDay = daySchedule?.dayEventList?.map { it
-            val eventId = it.eventId
-            val title = "${it.eventId}"
-            var comment = StringBuilder()
-            it.detailList?.forEach { detail ->
-                comment.append(detail.content)
-            }
-            DayEventExhibitionData(eventId, title, comment.toString())
+            createDayEventExhibitionData(it)
         } ?: mutableListOf()
         _dayEventList.value = eventListOnOneDay
     }
@@ -68,5 +64,12 @@ class TripDayScheduleViewModel(val dataSource: TripDetailDataSource, val dayId: 
 
     fun updatePageHandler(pageHandler: IPageHandler?) {
         nextHandler = pageHandler
+    }
+
+    private fun createDayEventExhibitionData(dayEvent: DayEvent): DayEventExhibitionData {
+        val dayEventId = dayEvent.eventId
+        val eventTitle = EventDetailUtils.obtainEventNameDetailContent(dayEvent)
+        val eventContent = EventDetailUtils.obtainEventContentDetailContent(dayEvent)
+        return DayEventExhibitionData(dayEventId, eventTitle, eventContent)
     }
 }

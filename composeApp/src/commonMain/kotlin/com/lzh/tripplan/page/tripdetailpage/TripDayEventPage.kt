@@ -44,7 +44,7 @@ import tripplan.composeapp.generated.resources.left_arrow
 @Composable
 fun TripDayEventPage(dayScheduleId: Long, dayEventId: Long, parentPageHandler: IPageHandler, onBack: () -> Unit) {
     val dataSource = rememberUpdatedState(LocalTripDetailDataSources.current)
-    val viewModel = remember { TripDayEventViewModel(dayScheduleId, dayScheduleId, dataSource.value) }
+    val viewModel = remember { TripDayEventViewModel(dayScheduleId, dayEventId, dataSource.value) }
 
     Column {
         DayEventTitleArea(

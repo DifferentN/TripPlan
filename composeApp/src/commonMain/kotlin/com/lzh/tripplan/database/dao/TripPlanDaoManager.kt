@@ -47,11 +47,11 @@ object TripPlanDaoManager {
     }
 
     suspend fun createTripDayDetail(eventId: Long, priority: Long, content: String) {
-        return DatabaseManager.dbQuery.upsertEventDetail(eventId, priority, content, -1)
+        return DatabaseManager.dbQuery.insertEventDetail(eventId, priority, content)
     }
 
-    suspend fun upsertTripDayDetail(eventId: Long, priority: Long?, content: String, eventDetailId: Long) {
-        return DatabaseManager.dbQuery.upsertEventDetail(eventId, priority, content, eventDetailId)
+    suspend fun updateTripDayDetail(eventId: Long, priority: Long?, content: String, eventDetailId: Long) {
+        return DatabaseManager.dbQuery.updateEventDetail(eventId, priority, content, eventDetailId)
     }
 
     private fun mapTrip(id: Long, name: String?): Trip {

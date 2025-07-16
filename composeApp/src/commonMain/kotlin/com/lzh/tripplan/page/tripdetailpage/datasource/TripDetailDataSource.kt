@@ -103,8 +103,12 @@ class TripDetailDataSource {
         return daySchedule?.dayEventList?.last()?.eventId ?: -1
     }
 
-    suspend fun upsertEventDetail(eventId: Long, priority: Long, content: String, detailId: Long) {
-        TripPlanDaoManager.upsertTripDayDetail(eventId, priority, content, detailId)
+    suspend fun createEventDetail(eventId: Long, priority: Long, content: String) {
+        TripPlanDaoManager.createTripDayDetail(eventId, priority, content)
+    }
+
+    suspend fun updateEventDetail(eventId: Long, priority: Long, content: String, detailId: Long) {
+        TripPlanDaoManager.updateTripDayDetail(eventId, priority, content, detailId)
     }
 
     fun notifyTripDataChanged() {

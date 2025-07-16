@@ -2,8 +2,10 @@ package com.lzh.tripplan.viewmodel.tripdetail
 
 import androidx.lifecycle.viewModelScope
 import com.lzh.tripplan.database.entity.DayEvent
+import com.lzh.tripplan.database.entity.DayEventDetail
 import com.lzh.tripplan.event.PageEvent
 import com.lzh.tripplan.page.tripdetailpage.datasource.TripDetailDataSource
+import com.lzh.tripplan.utils.EventDetailUtils
 import com.lzh.tripplan.viewmodel.BaseViewModel
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +20,6 @@ import kotlinx.coroutines.launch
  * @date 2025/7/9
  */
 class TripDayEventViewModel(val dayScheduleId: Long, val dayEventId: Long, val dataSource: TripDetailDataSource): BaseViewModel() {
-    private val EMPTY_DAY_EVENT_NAME = "Input day event name"
-    private val EMPTY_DAY_EVENT_CONTENT = "Input day event content"
     // 日程事件名称
     private val _dayEventName = MutableStateFlow("")
     val dayEventName = _dayEventName.asStateFlow()
@@ -38,25 +38,25 @@ class TripDayEventViewModel(val dayScheduleId: Long, val dayEventId: Long, val d
         if (dayEvent != null) {
             dayEventExist = true
         }
-        _dayEventName.value = extractEventName(dayEvent)
-        _dayEventContent.value = extractEventContent(dayEvent)
+        _dayEventName.value = EventDetailUtils.obtainEventNameDetailContent(dayEvent)
+        _dayEventContent.value = EventDetailUtils.obtainEventContentDetailContent(dayEvent)
     }
 
     fun saveDayEvent() {
         viewModelScope.launch {
-            val nameDetailId = obtainEventNameDetailId(dayEvent)
-            val contentDetailId = obtainEventContentDetailId(dayEvent)
+            val nameDetailId = EventDetailUtils.obtainEventNameDetailId(dayEvent)
+            val contentDetailId = EventDetailUtils.obtainEventContentDetailId(dayEvent)
             val eventId = dayEvent?.eventId ?: -1
             if (eventId > 0) {
-                dataSource.upsertEventDetail(eventId, 2, resultEventName, nameDetailId)
-                dataSource.upsertEventDetail(eventId, 1, resultEventName, contentDetailId)
+                dataSource.updateEventDetail(eventId, 2, resultEventName, nameDetailId)
+                dataSource.updateEventDetail(eventId, 1, resultEventContent, contentDetailId)
             } else {
                 val eventId = dataSource.createNewDayEvent(dayScheduleId)
                 if (eventId < 0) {
                     return@launch
                 }
-                dataSource.upsertEventDetail(eventId, 2, resultEventName, nameDetailId)
-                dataSource.upsertEventDetail(eventId, 1, resultEventName, contentDetailId)
+                dataSource.createEventDetail(eventId, 2, resultEventName)
+                dataSource.createEventDetail(eventId, 1, resultEventContent)
                 dayEvent = dataSource.obtainDayEvent(dayScheduleId, eventId)
             }
         }
@@ -81,37 +81,5 @@ class TripDayEventViewModel(val dayScheduleId: Long, val dayEventId: Long, val d
         return null
     }
 
-    private fun extractEventName(dayEvent: DayEvent?): String {
-        if (dayEvent == null) {
-            return EMPTY_DAY_EVENT_NAME
-        }
-        val dayDetail = dayEvent.detailList?.getOrNull(0)
-        val dayEventName = if (dayDetail?.content.isNullOrEmpty()) {
-            EMPTY_DAY_EVENT_NAME
-        } else {
-            dayDetail.content
-        }
-        return dayEventName
-    }
 
-    private fun extractEventContent(dayEvent: DayEvent?): String {
-        if (dayEvent == null) {
-            return EMPTY_DAY_EVENT_CONTENT
-        }
-        val dayDetail = dayEvent.detailList?.getOrNull(1)
-        val dayEventContent = if (dayDetail?.content.isNullOrEmpty()) {
-            EMPTY_DAY_EVENT_CONTENT
-        } else {
-            dayDetail.content
-        }
-        return dayEventContent
-    }
-
-    private fun obtainEventNameDetailId(dayEvent: DayEvent?): Long {
-        return dayEvent?.detailList?.getOrNull(0)?.eventDetailId ?: -1
-    }
-
-    private fun obtainEventContentDetailId(dayEvent: DayEvent?): Long {
-        return dayEvent?.detailList?.getOrNull(1)?.eventDetailId ?: -1
-    }
 }

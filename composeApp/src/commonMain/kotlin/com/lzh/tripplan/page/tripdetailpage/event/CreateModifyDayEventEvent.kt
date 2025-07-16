@@ -9,5 +9,5 @@ import com.lzh.tripplan.event.PageEvent
  * @author zhenghaoli
  * @date 2025/7/9
  */
-class CreateDayEventEvent(val pageId: String, val dayScheduleId: Long, val dayEventId: Long): PageEvent {
+class CreateModifyDayEventEvent(val pageId: String, val dayScheduleId: Long, val dayEventId: Long): PageEvent {
 }

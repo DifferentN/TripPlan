@@ -11,22 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetState
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +37,7 @@ import com.lzh.tripplan.page.CREATE_DAY_EVENT_PAGE
 import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.DayEventExhibitionData
 import com.lzh.tripplan.page.tripdetailpage.datasource.LocalTripDetailDataSources
 import com.lzh.tripplan.page.tripdetailpage.datasource.LocalTripDetailViewModelStore
-import com.lzh.tripplan.page.tripdetailpage.event.CreateDayEventEvent
+import com.lzh.tripplan.page.tripdetailpage.event.CreateModifyDayEventEvent
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
 import com.lzh.tripplan.viewmodel.IPageHandler
 import com.lzh.tripplan.viewmodel.tripdetail.TripDayScheduleViewModel
@@ -74,13 +67,22 @@ fun TripDaySchedulePage(dayId: Long, parentPageHandler: IPageHandler?) {
     Box(Modifier.fillMaxSize()) {
         LazyColumn(Modifier.fillMaxSize().align(Alignment.Center)) {
             items(eventList, key = { it.eventId }) {
-                TripDayEvent(it)
+                TripDayEvent(
+                    it,
+                    onDayEventClick = {dayEventId ->
+                        parentPageHandler?.handlePageEvent(
+                            CreateModifyDayEventEvent(CREATE_DAY_EVENT_PAGE, dayId, dayEventId)
+                        ) { result: HandlePageEventResult ->
+                            // no nothing
+                        }
+                    }
+                )
             }
             item(key = "addDayEvent") {
                 AddDayEvent(Modifier.fillMaxWidth(),
                     onClickAddDayEvent = {
                         parentPageHandler?.handlePageEvent(
-                            CreateDayEventEvent(CREATE_DAY_EVENT_PAGE, dayId, -1)
+                            CreateModifyDayEventEvent(CREATE_DAY_EVENT_PAGE, dayId, -1)
                         ) { result: HandlePageEventResult ->
                             // no nothing
                         }
@@ -93,10 +95,13 @@ fun TripDaySchedulePage(dayId: Long, parentPageHandler: IPageHandler?) {
 }
 
 @Composable
-fun TripDayEvent(dayEventExhibitionData: DayEventExhibitionData) {
-    Column(Modifier.border(2.dp, Color.Gray, shape = RoundedCornerShape(10.dp))
-        .padding(0.dp, 4.dp))
-    {
+fun TripDayEvent(dayEventExhibitionData: DayEventExhibitionData, onDayEventClick: (dayEventId: Long) -> Unit) {
+    Column(Modifier
+        .border(2.dp, Color.Gray, shape = RoundedCornerShape(10.dp))
+        .fillMaxWidth()
+        .padding(0.dp, 4.dp)
+        .clickable { onDayEventClick(dayEventExhibitionData.eventId) }
+    ) {
         Text(dayEventExhibitionData.title)
         Spacer(Modifier.height(12.dp))
         Text(dayEventExhibitionData.comment)
