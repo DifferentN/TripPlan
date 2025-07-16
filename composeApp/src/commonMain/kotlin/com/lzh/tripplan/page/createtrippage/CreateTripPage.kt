@@ -1,6 +1,7 @@
 package com.lzh.tripplan.page.createtrippage
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -68,10 +71,15 @@ fun CreateTripPage(modifier: Modifier,
         }
         Box(Modifier.fillMaxWidth().fillMaxHeight()) {
 
-            Column(Modifier.fillMaxWidth().fillMaxHeight()) {
-                Spacer(Modifier.height(120.dp))
+            Column(Modifier.fillMaxWidth().fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 // 旅程名称输入
                 TextField(tripName,
+                    modifier = Modifier
+                        .padding(8.dp, 0.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.Start)
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(4.dp)),
                     placeholder = { Text("输入旅程名称") },
                     onValueChange = {
                         tripName = it
@@ -84,17 +92,21 @@ fun CreateTripPage(modifier: Modifier,
                         disabledIndicatorColor = Color.Transparent
                     )
                 )
-
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            isShowCreateTripLoading.value = true
-                            val result = viewModel.createTrip(tripName)
-                            isShowCreateTripLoading.value = false
-                            onCreateResult(result.isSuccess, result.tripId)
-                        } },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(4.dp))
+                        .padding(8.dp, 0.dp)
+                        .clickable {
+                            scope.launch {
+                                isShowCreateTripLoading.value = true
+                                val result = viewModel.createTrip(tripName)
+                                isShowCreateTripLoading.value = false
+                                onCreateResult(result.isSuccess, result.tripId)
+                            } },
                     text = "确认",
-                    fontSize = 24.sp)
+                    fontSize = 18.sp)
             }
 
             if (isShowCreateTripLoading.value) {

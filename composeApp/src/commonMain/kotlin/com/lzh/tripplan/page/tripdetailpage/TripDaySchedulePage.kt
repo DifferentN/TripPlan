@@ -38,6 +38,7 @@ import com.lzh.tripplan.page.tripdetailpage.data.tripdetail.DayEventExhibitionDa
 import com.lzh.tripplan.page.tripdetailpage.datasource.LocalTripDetailDataSources
 import com.lzh.tripplan.page.tripdetailpage.datasource.LocalTripDetailViewModelStore
 import com.lzh.tripplan.page.tripdetailpage.event.CreateModifyDayEventEvent
+import com.lzh.tripplan.utils.DAY_SCHEDULE_DETAIL_BG
 import com.lzh.tripplan.viewmodel.HandlePageEventResult
 import com.lzh.tripplan.viewmodel.IPageHandler
 import com.lzh.tripplan.viewmodel.tripdetail.TripDayScheduleViewModel
@@ -64,7 +65,7 @@ fun TripDaySchedulePage(dayId: Long, parentPageHandler: IPageHandler?) {
 
     val viewModel by rememberUpdatedState(vm)
     val eventList = viewModel.dayEventList.collectAsState().value
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(4.dp, 4.dp)) {
         LazyColumn(Modifier.fillMaxSize().align(Alignment.Center)) {
             items(eventList, key = { it.eventId }) {
                 TripDayEvent(
@@ -77,6 +78,7 @@ fun TripDaySchedulePage(dayId: Long, parentPageHandler: IPageHandler?) {
                         }
                     }
                 )
+                Spacer(Modifier.height(4.dp))
             }
             item(key = "addDayEvent") {
                 AddDayEvent(Modifier.fillMaxWidth(),
@@ -96,14 +98,13 @@ fun TripDaySchedulePage(dayId: Long, parentPageHandler: IPageHandler?) {
 
 @Composable
 fun TripDayEvent(dayEventExhibitionData: DayEventExhibitionData, onDayEventClick: (dayEventId: Long) -> Unit) {
-    Column(Modifier
-        .border(2.dp, Color.Gray, shape = RoundedCornerShape(10.dp))
+    Column(Modifier.background(DAY_SCHEDULE_DETAIL_BG, shape = RoundedCornerShape(6.dp))
         .fillMaxWidth()
-        .padding(0.dp, 4.dp)
+        .padding(2.dp, 4.dp)
         .clickable { onDayEventClick(dayEventExhibitionData.eventId) }
     ) {
         Text(dayEventExhibitionData.title)
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(6.dp))
         Text(dayEventExhibitionData.comment)
     }
 }

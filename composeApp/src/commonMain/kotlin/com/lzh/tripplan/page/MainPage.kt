@@ -74,7 +74,6 @@ fun MainPage(wholeAppNavigator: Navigator) {
                 )
             }
             scene(CREATE_TRIP_PAGE) {
-                Text("Add Trip")
                 CreateTripPage(Modifier, onBack = {mainPageNavigator.goBack()}) { isSuccess, tripId ->
                     if (isSuccess) {
                         mainPageNavigator.navigate("$EXHIBITION_TRIP_PAGE/$tripId",

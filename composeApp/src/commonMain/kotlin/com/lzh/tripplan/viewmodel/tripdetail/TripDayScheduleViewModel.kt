@@ -68,8 +68,9 @@ class TripDayScheduleViewModel(val dataSource: TripDetailDataSource, val dayId: 
 
     private fun createDayEventExhibitionData(dayEvent: DayEvent): DayEventExhibitionData {
         val dayEventId = dayEvent.eventId
-        val eventTitle = EventDetailUtils.obtainEventNameDetailContent(dayEvent)
-        val eventContent = EventDetailUtils.obtainEventContentDetailContent(dayEvent)
+        val detailList = EventDetailUtils.sortEventNameDetail(dayEvent)
+        val eventTitle = detailList?.getOrNull(0)?.content ?: ""
+        val eventContent = detailList?.getOrNull(1)?.content ?: ""
         return DayEventExhibitionData(dayEventId, eventTitle, eventContent)
     }
 }
